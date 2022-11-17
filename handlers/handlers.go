@@ -14,7 +14,8 @@ type FaceRecognitionHandler struct {
 }
 
 type FaceFoundRequest struct {
-	ID string `json:"id"`
+	Name string `json:"name"`
+	ID   string `json:"id"`
 }
 
 type FaceFoundResponse struct {
@@ -66,7 +67,7 @@ func (h *FaceRecognitionHandler) ServeHTTP(w http.ResponseWriter, req *http.Requ
 			return
 		}
 
-		err = h.Conn.WriteMessage(websocket.TextMessage, []byte(body.ID))
+		err = h.Conn.WriteJSON(body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Header().Set("Content-Type", "application/json")
