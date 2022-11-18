@@ -45,7 +45,7 @@ func (h *FaceRecognitionHandler) ServeHTTP(w http.ResponseWriter, req *http.Requ
 		}
 
 		h.Conn = conn
-		fmt.Println(("ws connection started!"))
+		fmt.Println(("ws connection started! v2.2"))
 
 	case http.MethodPost:
 
