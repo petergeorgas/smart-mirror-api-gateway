@@ -5,13 +5,22 @@ import (
 	"log"
 	"net/http"
 	"smartmirror/handlers"
+
+	"github.com/rs/cors"
 )
 
 func main() {
 
 	h := handlers.NewFaceRecognitionHandler()
 
-	http.Handle("/face", h)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
+	})
+
+	http.Handle("/face", c.Handler(h))
 
 	fmt.Println("Server listening on port 8080!")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
