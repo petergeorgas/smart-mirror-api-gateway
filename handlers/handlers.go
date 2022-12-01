@@ -9,8 +9,9 @@ import (
 )
 
 type FaceRecognitionHandler struct {
-	Upgrader *websocket.Upgrader
-	Conn     *websocket.Conn
+	Upgrader        *websocket.Upgrader
+	Conn            *websocket.Conn
+	IsInWorkoutMode bool
 }
 
 type FaceFoundRequest struct {
@@ -29,7 +30,7 @@ type FaceFoundErrorResponse struct {
 func NewFaceRecognitionHandler() *FaceRecognitionHandler {
 	return &FaceRecognitionHandler{Upgrader: &websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
-	}}
+	}, IsInWorkoutMode: false}
 }
 
 func (h *FaceRecognitionHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -67,15 +68,28 @@ func (h *FaceRecognitionHandler) ServeHTTP(w http.ResponseWriter, req *http.Requ
 			return
 		}
 
-		err = h.Conn.WriteJSON(body)
-		if err != nil {
+		if !h.IsInWorkoutMode || body.ID == "resetworkout" { // Drop all requests that would interrupt workout except for workout reset
+			err = h.Conn.WriteJSON(body)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(FaceFoundErrorResponse{Message: "failed to write message to WS"})
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(FaceFoundResponse{Success: true})
+		} else {
 			w.WriteHeader(http.StatusBadRequest)
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(FaceFoundErrorResponse{Message: "failed to write message to WS"})
+			json.NewEncoder(w).Encode(FaceFoundErrorResponse{Message: "Dropped request due to workout in progress."})
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(FaceFoundResponse{Success: true})
+
+		if body.ID == "coreworkout" || body.ID == "generalworkout" || body.ID == "yogaworkout" {
+			h.IsInWorkoutMode = true
+		} else if h.IsInWorkoutMode {
+			h.IsInWorkoutMode = false
+		}
 
 	default:
 
