@@ -14,7 +14,7 @@ func main() {
 	h := handlers.NewFaceRecognitionHandler()
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://smartmirror.website"},
+		AllowedOrigins:   []string{"http://localhost:3000", "http://smartmirror.website:3000", "http://smartmirror.website:*"},
 		AllowCredentials: true,
 		// Enable Debugging for testing, consider disabling in production
 		Debug: true,
