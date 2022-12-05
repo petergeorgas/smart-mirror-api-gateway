@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -87,6 +88,10 @@ func (h *FaceRecognitionHandler) ServeHTTP(w http.ResponseWriter, req *http.Requ
 
 		if body.ID == "coreworkout" || body.ID == "generalworkout" || body.ID == "yogaworkout" {
 			h.IsInWorkoutMode = true
+			go func() {
+				time.Sleep(15 * time.Minute)
+				h.IsInWorkoutMode = false // In real life, we probably want a mutex (lol)
+			}()
 		} else if h.IsInWorkoutMode {
 			h.IsInWorkoutMode = false
 		}
