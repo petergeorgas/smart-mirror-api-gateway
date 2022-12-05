@@ -89,7 +89,7 @@ func (h *FaceRecognitionHandler) ServeHTTP(w http.ResponseWriter, req *http.Requ
 		if body.ID == "coreworkout" || body.ID == "generalworkout" || body.ID == "yogaworkout" {
 			h.IsInWorkoutMode = true
 			go func() {
-				time.Sleep(15 * time.Minute)
+				time.Sleep(30 * time.Minute)
 				h.IsInWorkoutMode = false // In real life, we probably want a mutex (lol)
 			}()
 		} else if h.IsInWorkoutMode {
